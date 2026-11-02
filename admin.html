@@ -61,22 +61,22 @@ $('#lf').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);
  if(error)return $('#le').textContent='البريد أو كلمة المرور غير صحيحة.';init()};
 $('#out').onclick=async()=>{await sb.auth.signOut();location.reload()};
 async function load(){
- [P,O]=await Promise.all([sb.from('participants').select('*').order('num').then(r=>r.data||[]),sb.from('outputs').select('*,participants(name,num,path)').order('created_at',{ascending:false}).then(r=>r.data||[])]);
+ [P,O]=await Promise.all([sb.from('participants_ai').select('*').order('num').then(r=>r.data||[]),sb.from('outputs').select('*,participants_ai(name,num,path)').order('created_at',{ascending:false}).then(r=>r.data||[])]);
  $('#k1').textContent=P.length;$('#k2').textContent=P.filter(x=>x.live).length;$('#k3').textContent=O.filter(x=>x.status==='pending').length;$('#k4').textContent=O.filter(x=>x.status==='approved').length;draw()}
 function draw(){
  if(tab==='p')$('#box').innerHTML='<table><tr><th>#</th><th>الاسم</th><th>المسار</th><th>الجامعة / الدولة</th><th>مباشر</th><th>حضر</th><th>ظهور</th><th></th></tr>'+P.map(x=>`<tr><td>${x.num}</td><td>${esc(x.name)}<br><small>@${esc(x.username)}</small></td><td>${esc(x.path)}</td><td>${esc(x.university)} · ${esc(x.country)}</td><td>${x.live?'نعم':'لا'}</td><td><button class="s" data-a="att" data-id="${x.id}">${x.attended?'نعم ✓':'تسجيل الحضور'}</button></td><td>${x.consent?'موافق':'لا'}</td><td><button class="s d" data-a="del" data-id="${x.id}">حذف</button></td></tr>`).join('')+'</table>';
- else $('#box').innerHTML='<table><tr><th>المشارك</th><th>الفكرة</th><th>المحتوى</th><th>الحالة</th><th></th></tr>'+O.map(x=>`<tr><td>#${x.participants?.num} ${esc(x.participants?.name)}<br><small>${esc(x.participants?.path)}</small></td><td>${esc(x.title)}<br><a href="${esc(x.post_url)}" target="_blank" rel="noopener" style="color:var(--blue)">المنشور</a></td><td><small>${esc(x.problem)}<br>${esc(x.solution)}<br>${esc(x.thinking)}<br>الذكاء الاصطناعي: ${esc(x.ai_role)}<br>النتيجة: ${esc(x.result)}</small></td><td>${esc(x.status)}${x.reason?'<br><small>'+esc(x.reason)+'</small>':''}</td><td><button class="s" data-a="ok" data-id="${x.id}">اعتماد</button> <button class="s d" data-a="no" data-id="${x.id}">رفض</button></td></tr>`).join('')+'</table>'}
+ else $('#box').innerHTML='<table><tr><th>المشارك</th><th>الفكرة</th><th>المحتوى</th><th>الحالة</th><th></th></tr>'+O.map(x=>`<tr><td>#${x.participants_ai?.num} ${esc(x.participants_ai?.name)}<br><small>${esc(x.participants_ai?.path)}</small></td><td>${esc(x.title)}<br><a href="${esc(x.post_url)}" target="_blank" rel="noopener" style="color:var(--blue)">المنشور</a></td><td><small>${esc(x.problem)}<br>${esc(x.solution)}<br>${esc(x.thinking)}<br>الذكاء الاصطناعي: ${esc(x.ai_role)}<br>النتيجة: ${esc(x.result)}</small></td><td>${esc(x.status)}${x.reason?'<br><small>'+esc(x.reason)+'</small>':''}</td><td><button class="s" data-a="ok" data-id="${x.id}">اعتماد</button> <button class="s d" data-a="no" data-id="${x.id}">رفض</button></td></tr>`).join('')+'</table>'}
 $('.tabs').onclick=e=>{const b=e.target.closest('button[data-t]');if(!b)return;tab=b.dataset.t;document.querySelectorAll('.tabs [data-t]').forEach(x=>x.className=x===b?'on':'s');draw()};
 $('#box').onclick=async e=>{const b=e.target.closest('button[data-a]');if(!b)return;const id=b.dataset.id,a=b.dataset.a;
- if(a==='att'){const p=P.find(x=>x.id===id);await sb.from('participants').update({attended:!p.attended}).eq('id',id)}
- if(a==='del'){if(!confirm('حذف المشارك ومخرجه نهائيًا؟'))return;await sb.from('participants').delete().eq('id',id)}
+ if(a==='att'){const p=P.find(x=>x.id===id);await sb.from('participants_ai').update({attended:!p.attended}).eq('id',id)}
+ if(a==='del'){if(!confirm('حذف المشارك ومخرجه نهائيًا؟'))return;await sb.from('participants_ai').delete().eq('id',id)}
  if(a==='ok')await sb.from('outputs').update({status:'approved',reason:null}).eq('id',id);
  if(a==='no'){const r=prompt('سبب الرفض (يظهر للمشارك):');if(r===null)return;await sb.from('outputs').update({status:'rejected',reason:r}).eq('id',id)}
  load()};
 $('#csv').onclick=()=>{const h=['num','name','username','major','university','country','linkedin','path','live','attended','consent'];
  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
  const t='\ufeff'+h.join(',')+'\n'+P.map(x=>h.map(k=>q(x[k])).join(',')).join('\n');
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='participants.csv';a.click()};
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='participants_ai.csv';a.click()};
 init();
 </script>
 </body>
